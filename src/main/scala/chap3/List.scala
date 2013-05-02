@@ -18,6 +18,34 @@ object List {
     case Cons(x, xs) ⇒ x * product(xs)
   }
 
+  // we infer foldRight's implementation by generalizing from sum and product
+  def foldRight[A, B](l: List[A], z: B)(f: (A, B) ⇒ B): B = l match {
+    case Nil ⇒ z
+    case Cons(x, xs) ⇒ f(x, foldRight(xs, z)(f))
+  }
+
+  def sumR(ints: List[Int]): Int = foldRight(ints, 0)(_ + _)
+
+  def productR(doubles: List[Double]): Double = foldRight(doubles, 1.0)(_ * _)
+
+  def lengthR[A](l: List[A]): Int = foldRight(l, 0)((_, acc) ⇒ acc + 1)
+
+  @tailrec
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil ⇒ z
+    case Cons(x, xs) ⇒ foldLeft(xs, f(z, x))(f)
+  }
+
+  def sumL(ints: List[Int]): Int = foldLeft(ints, 0)(_ + _)
+
+  def productL(doubles: List[Double]): Double = foldLeft(doubles, 1.0)(_ * _)
+
+  def lengthL[A](l: List[A]): Int = foldLeft(l, 0)((acc, _) ⇒ acc + 1)
+
+  def apply[A](as: A*): List[A] =
+    if (as.isEmpty) Nil
+    else Cons(as.head, apply(as.tail: _*))
+
   def tail[T](l: List[T]): List[T] = l match {
     case Nil ⇒ sys.error("tail of an empty list !")
     case Cons(_, t) ⇒ t

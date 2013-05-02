@@ -5,5 +5,13 @@ import List._
 
 object Run extends App {
 
-  println(init(Cons(1, Cons(2, Cons(3, Nil)))))
+  println {
+    foldRight(List(1, 2, 3, 4, 5), 0)(_ + _)
+  }
+  println {
+    lengthR(List((1 to 897): _*))
+  }
+  println {
+    foldLeft(List(1, 2, 3, 4, 5), 0)(_ + _)
+  }
 }
