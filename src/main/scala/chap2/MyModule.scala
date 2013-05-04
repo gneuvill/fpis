@@ -46,15 +46,15 @@ object PolymorphicFunctions {
     go(0, true)
   }
 
-  def partial1[A,B,C](a: A, f: (A,B) => C): B => C = b ⇒ f(a, b)
+  def partial1[A,B,C](a: A, f: (A,B) ⇒ C): B ⇒ C = b ⇒ f(a, b)
 
   // an example of usage of partial1
   def add(n1: Int, n2: Int): Int = n1 + n2
   def add10  = partial1(10, add)
 
-  def curry[A,B,C](f: (A, B) => C): A => (B => C) = a ⇒ b ⇒ f(a, b)
+  def curry[A,B,C](f: (A, B) ⇒ C): A ⇒ (B ⇒ C) = a ⇒ b ⇒ f(a, b)
 
-  def uncurry[A,B,C](f: A => B => C): (A, B) => C = (a, b) ⇒ f(a)(b)
+  def uncurry[A,B,C](f: A ⇒ B ⇒ C): (A, B) ⇒ C = (a, b) ⇒ f(a)(b)
 
-  def compose[A,B,C](f: B => C, g: A => B): A => C = a ⇒ f(g(a))
+  def compose[A,B,C](f: B ⇒ C, g: A ⇒ B): A ⇒ C = a ⇒ f(g(a))
 }
