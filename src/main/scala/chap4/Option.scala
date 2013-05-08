@@ -77,5 +77,12 @@ object Option {
 
   def bothMatch_2(pat1: String, pat2: String, s: String): Option[Boolean] =
     map2(mkMatcher(pat1), mkMatcher(pat2))((f1, f2) ⇒ f1(s) && f2(s))
-}
 
+  def sequence[A](a: List[Option[A]]): Option[List[A]] =
+    a.foldRight(Some(Nil): Option[List[A]])((o, acc) ⇒ map2(o, acc)(_ :: _))
+
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] =
+    a.foldRight(Some(Nil): Option[List[B]])((o, acc) ⇒ map2(f(o), acc)(_ :: _))
+
+  def sequence_1[A](a: List[Option[A]]): Option[List[A]] = traverse(a)(v ⇒ v)
+}
