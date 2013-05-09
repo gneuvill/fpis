@@ -21,6 +21,7 @@ object MyModule {
     s"The factorial of $x is ${factorial(x)}"
 
   def fib(n: Int): Int = {
+    @tailrec
     def go(x: Int, prev: Int, cur: Int): Int =
       if (x >= n) prev
       else go(x + 1,  cur, prev + cur)

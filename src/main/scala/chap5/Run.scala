@@ -1,6 +1,7 @@
 package fpis.chap5
 
 import laziness._ 
+import Stream._
 
 object Run extends App {
   println {
@@ -22,6 +23,30 @@ object Run extends App {
     Stream(1, 2, 3, 4, 5).append(Stream(6, 7, 8, 9, 10)).toList
   }
   println {
-    Stream(1, 2, 3, 4, 5) flatMap { i ⇒ Stream(i, 28) } toList
+    Stream(1, 2, 3, 4, 5).flatMap(i ⇒ Stream(i, 28)).toList
+  }
+  println {
+    constant("toto").take(5).toList
+  }
+  println {
+    from(5).takeWhile(_ <= 15).toList
+  }
+  println {
+    fibs.take(20).toList
+  }
+  println {
+    fibs_1.take(20).toList
+  }
+  println {
+    from_1(5).takeWhile(_ <= 15).toList
+  }
+  println {
+    constant_1("toto").take(5).toList
+  }
+  println {
+    Stream(1, 2, 3, 4, 5).take_1(2).toList
+  }
+  println {
+    Stream(1, 2, 3, 4, 5).takeWhile_2(_ != 4).toList
   }
 }

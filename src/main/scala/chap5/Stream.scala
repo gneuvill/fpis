@@ -43,7 +43,7 @@ trait Stream[+A] {
 
   def exists(p: A ⇒ Boolean): Boolean = foldRight(false)(p(_) || _)
 
-  def forall(p: A ⇒ Boolean): Boolean =  foldRight(false)(p(_) && _)
+  def forall(p: A ⇒ Boolean): Boolean = foldRight(false)(p(_) && _)
 
   def takeWhile_1(p: A ⇒ Boolean): Stream[A] =
     foldRight(empty[A])((a, acc) ⇒ if (p(a)) cons(a, acc) else empty)
@@ -59,6 +59,18 @@ trait Stream[+A] {
   def flatMap[B](f: A ⇒ Stream[B]): Stream[B] =
     foldRight(empty[B])((a, acc) ⇒ f(a) append acc)
 
+  def map_1[B](f: A ⇒ B): Stream[B] =
+    unfold(this)( _.uncons map { case (h, t) ⇒ (f(h), t) })
+
+  def take_1(n: Int): Stream[A] =
+    unfold((this, n)){ case (as, i) ⇒
+      if (i > 0) as.uncons map { case (h, t) ⇒ (h, (t, i - 1)) }
+      else None
+    }
+
+  def takeWhile_2(p: A ⇒ Boolean): Stream[A] =
+    unfold(this)(as ⇒ as.uncons filter { case (h, t) ⇒ p(h) })
+
 }
 
 object Stream {
@@ -73,23 +85,31 @@ object Stream {
   def apply[A](as: A*): Stream[A] =
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
+
+  val ones: Stream[Int] = cons(1, ones)
+
+  def constant[A](a: A): Stream[A] = cons(a, constant(a))
+
+  def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+
+  def fibs: Stream[Int] = {
+    def loop(cur: Int, next: Int): Stream[Int] =
+      cons(cur, loop(next, cur + next))
+    loop(0, 1)
+  }
+
+  def unfold[A, S](z: S)(f: S ⇒ Option[(A, S)]): Stream[A] =
+    f(z) match {
+      case None ⇒ empty
+      case Some((a, s)) ⇒ cons(a, unfold(s)(f))
+    }
+
+  def fibs_1: Stream[Int] = unfold((0, 1)) { case (i1, i2) ⇒ Some((i1, (i2, i1 + i2))) }
+
+  def from_1(n: Int): Stream[Int] = unfold(n)(i ⇒ Some((i, i + 1)))
+
+  def constant_1[A](a: A): Stream[A] = unfold(a)(_ ⇒ Some((a, a)))
+
+  val ones_1: Stream[Int] = unfold(1)(_ ⇒ Some(1, 1))
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
