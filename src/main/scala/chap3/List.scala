@@ -110,6 +110,9 @@ object List {
     case (Cons(x, xs), Cons(y, ys)) ⇒ Cons(f(x, y), zipWith(xs, ys)(f))
   }
 
+  def zip[A, B, C](l: List[A], r: List[B]): List[(A, B)] = zipWith(l, r)((_, _))
+
+  @tailrec
   def startsWith[A](l: List[A], prefix: List[A]): Boolean = (l, prefix) match {
     case (_, Nil) ⇒ true
     case (Nil, _) ⇒ false
@@ -118,6 +121,7 @@ object List {
   }
 
   def hasSubsequence[A](l: List[A], r: List[A]): Boolean = {
+    @tailrec
     def loop[A](as: List[A]): Boolean = as match {
       case Nil ⇒ false
       case Cons(x, xs) if startsWith(as, r) ⇒ true

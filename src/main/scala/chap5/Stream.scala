@@ -43,7 +43,7 @@ trait Stream[+A] {
 
   def exists(p: A ⇒ Boolean): Boolean = foldRight(false)(p(_) || _)
 
-  def forall(p: A ⇒ Boolean): Boolean = foldRight(false)(p(_) && _)
+  def forAll(p: A ⇒ Boolean): Boolean = foldRight(true)(p(_) && _)
 
   def takeWhile_1(p: A ⇒ Boolean): Stream[A] =
     foldRight(empty[A])((a, acc) ⇒ if (p(a)) cons(a, acc) else empty)
@@ -60,16 +60,69 @@ trait Stream[+A] {
     foldRight(empty[B])((a, acc) ⇒ f(a) append acc)
 
   def map_1[B](f: A ⇒ B): Stream[B] =
-    unfold(this)( _.uncons map { case (h, t) ⇒ (f(h), t) })
+    unfold(this)(_.uncons map { case (h, t) ⇒ (f(h), t) })
 
   def take_1(n: Int): Stream[A] =
-    unfold((this, n)){ case (as, i) ⇒
-      if (i > 0) as.uncons map { case (h, t) ⇒ (h, (t, i - 1)) }
-      else None
+    unfold((this, n)) {
+      case (as, i) ⇒
+        if (i > 0) as.uncons map { case (h, t) ⇒ (h, (t, i - 1)) }
+        else None
     }
 
   def takeWhile_2(p: A ⇒ Boolean): Stream[A] =
     unfold(this)(as ⇒ as.uncons filter { case (h, t) ⇒ p(h) })
+
+  def zipWith[B, C](sb: Stream[B])(f: (A, B) ⇒ C): Stream[C] =
+    unfold((this, sb)) {
+      case (as, bs) ⇒ for {
+        (a, ta) ← as.uncons
+        (b, tb) ← bs.uncons
+      } yield (f(a, b), (ta, tb))
+    }
+
+  def zip[B](bs: Stream[B]): Stream[(A, B)] = zipWith(bs)((_, _))
+
+  def zipWithAllDumb[B, C](sb: Stream[B])(f: (Option[A], Option[B]) ⇒ C): Stream[C] =
+    unfold((this, sb)) {
+      case (as, bs) ⇒
+        (as.uncons, bs.uncons) match {
+          case (Some((a, ta)), Some((b, tb))) ⇒ Some((f(Some(a), Some(b)), (ta, tb)))
+          case (Some((a, ta)), None) ⇒ Some((f(Some(a), None), (ta, empty)))
+          case (None, Some((b, tb))) ⇒ Some((f(None, Some(b)), (empty, tb)))
+          case _ ⇒ None
+        }
+    }
+
+  def zipWithAll[B, C](s2: Stream[B])(f: (Option[A], Option[B]) => C): Stream[C] = {
+    val a = this map (Some(_)) append (constant(None))
+    val b = s2 map (Some(_)) append (constant(None))
+    unfold((a, b)) {
+      case (s1, s2) if s1.isEmpty && s2.isEmpty => None
+      case (s1, s2) => {
+        val (h1, t1) = s1.uncons.get
+        val (h2, t2) = s2.uncons.get
+        Some((f(h1, h2), (t1, t2)))
+      }
+    }
+  }
+
+  def zipAll[B](bs: Stream[B]): Stream[(Option[A], Option[B])] = zipWithAll(bs)((_, _))
+
+  def startsWith[B >: A](bs: Stream[B]): Boolean =
+    zipAll(bs).takeWhile(!_._2.isEmpty) forAll {
+      case (Some(h), Some(h2)) if h == h2 => true
+      case _ => false
+    }
+
+  def tails: Stream[Stream[A]] = unfold(this)(_.uncons map { case (h, t) ⇒ (cons(h, t), t) })
+
+  def hasSubsequence[B >: A](bs: Stream[B]): Boolean = tails exists (_ startsWith bs)
+
+  def scanRight[B](z: => B)(f: (A, => B) => B): Stream[B] =
+    foldRight(Stream(z))((a, bs) ⇒ bs.uncons match {
+      case None ⇒ empty
+      case Some((b, t)) ⇒ cons(f(a, b), bs)
+    })
 
 }
 

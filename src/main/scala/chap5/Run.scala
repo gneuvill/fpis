@@ -49,4 +49,16 @@ object Run extends App {
   println {
     Stream(1, 2, 3, 4, 5).takeWhile_2(_ != 4).toList
   }
+  println {
+    Stream(1, 2, 3, 4) startsWith Stream(1, 2, 3)
+  }
+  println {
+    (Stream(1, 2, 3, 4, 5).tails flatMap (s ⇒ s)).toList
+  }
+  println {
+    Stream(23, 37, 3, 4, 5, 48) hasSubsequence Stream(3, 4, 5)
+  }
+  println {
+    Stream(1, 2, 3).scanRight(0)(_ + _).toList
+  }
 }
