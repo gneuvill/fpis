@@ -11,27 +11,10 @@ object Run extends App {
   }
 
   println {
-    ints(10)(simple(10L))
+    ints(10)(simple(2L))
+  }
+  println {
+    ints_1(10)(simple(2L))
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
